@@ -26,36 +26,103 @@ class MyApp extends StatelessWidget {
 
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
+  var names = <String>[];
+  var index = 0;
+  var textChains = <TextChain>[];
+  final textController = TextEditingController();
+
+  void addName() {
+    names.add(textController.text);
+    notifyListeners();
+  }
+
+  void clearNames() {
+    names.clear();
+    textChains.clear();
+    notifyListeners();
+  }
+
+  String getNextName() {
+    var name = names.elementAt(index);
+    index++;
+    return name;
+  }
+
+  void updateTextChains() {
+    for(int i = textChains.length - 1; i < names.length - 1; i++) {
+      textChains.add(TextChain());
+    }
+    print(names);
+    print(textChains);
+    notifyListeners();
+  }
 }
 
 class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
+    /* How to find the size of the screen
+    final Size size = MediaQuery.sizeOf(context);
+    final double width = size.width;
+    final double height = size.height; */
 
     return Scaffold(
-      appBar: MyAppBar(title='Home'),
+      appBar: AppBar(
+        backgroundColor: Colors.blue[700],
+        title: Text("Home"),
+        centerTitle: true,
+      ),
       body: Column(
-        children: [Text('A random idea:'), Text(appState.current.asLowerCase)],
+        spacing: 5.0,
+        children: [
+          SizedBox(),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: appState.updateTextChains,
+              child: Text("Update Text Chains"),
+            )
+          ),
+          SizedBox(
+            width: double.infinity,
+            child: TextField(
+              controller: appState.textController,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: appState.addName,
+              child: Text("Add Name"),
+            ),
+          ),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: appState.clearNames,
+              child: Text("Clear Names"),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class MyAppBar extends AppBar {
-  Widget build(BuildContext context, String title) {
-    var homeIcon = Icon(Icons.home);
-    
-    return AppBar(
-      backgroundColor: Colors.blue[700],
-      title: Text(title),
-      centerTitle: true,
-      actions: [
-        IconButton(
-          onPressed: print("Hello"),
-          icon: homeIcon,
-          ),
-      ],
+class TextChain extends StatefulWidget {
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+
+    return Row(
+      children: [Text(appState.getNextName())],
     );
+  }
+  
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    throw UnimplementedError();
   }
 }
