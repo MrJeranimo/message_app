@@ -1,5 +1,6 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         ),
-        home: MyHomePage(),
+        home: ListViewBuilder(),
       ),
     );
   }
@@ -55,6 +56,41 @@ class MyAppState extends ChangeNotifier {
     print(names);
     print(textChains);
     notifyListeners();
+  }
+
+  void onListClick() {
+    int index = this.index;
+    print("List Item Clicked $index");
+  }
+}
+
+class ListViewBuilder extends StatelessWidget {
+  const ListViewBuilder({Key? key}) : super(key: key); // Constructor with optimal key
+
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue[700],
+        title: const Text("Home Page"),
+        centerTitle: true,
+      ),
+
+      body: ListView.builder(
+        itemCount: 10,
+
+        itemBuilder: (BuildContext context, int index) {
+          return ListTile(
+            leading: Icon(Icons.list),
+            trailing: Text("N/A"),
+            title: Text("Text Chain $index"),
+            onTap: appState.onListClick,
+          );
+        },
+      ),
+    );
   }
 }
 
