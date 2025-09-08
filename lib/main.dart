@@ -1,6 +1,5 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -31,6 +30,7 @@ class MyAppState extends ChangeNotifier {
   var index = 0;
   var textChains = <TextChain>[];
   final textController = TextEditingController();
+  int currentIndex = 0;
 
   void addName() {
     names.add(textController.text);
@@ -58,14 +58,21 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void onListClick() {
-    int index = this.index;
+  void onListClick(int index, context) {
+    currentIndex = index;
     print("List Item Clicked $index");
+    // Pushes a new page onto the navigation stack
+    // Uses the MaterialPageRoute to go to the new page
+    Navigator.push(context, MaterialPageRoute(builder:(context) => TextChain()));
+  }
+
+  void sendMessage(int index) {
+    print("Updated Text Chain $index");
   }
 }
 
 class ListViewBuilder extends StatelessWidget {
-  const ListViewBuilder({Key? key}) : super(key: key); // Constructor with optimal key
+  const ListViewBuilder({super.key}); // Constructor with optimal key
 
   @override
   Widget build(BuildContext context) {
@@ -77,16 +84,14 @@ class ListViewBuilder extends StatelessWidget {
         title: const Text("Home Page"),
         centerTitle: true,
       ),
-
       body: ListView.builder(
         itemCount: 10,
-
         itemBuilder: (BuildContext context, int index) {
           return ListTile(
             leading: Icon(Icons.list),
             trailing: Text("N/A"),
             title: Text("Text Chain $index"),
-            onTap: appState.onListClick,
+            onTap: () => appState.onListClick(index, context),
           );
         },
       ),
@@ -94,71 +99,47 @@ class ListViewBuilder extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class TextChain extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
-    /* How to find the size of the screen
-    final Size size = MediaQuery.sizeOf(context);
-    final double width = size.width;
-    final double height = size.height; */
+    int index = appState.currentIndex;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[700],
-        title: Text("Home"),
+        title: Text("Text Chain $index"),
         centerTitle: true,
       ),
-      body: Column(
-        spacing: 5.0,
-        children: [
-          SizedBox(),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: appState.updateTextChains,
-              child: Text("Update Text Chains"),
-            )
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: TextField(
-              controller: appState.textController,
-              textAlign: TextAlign.center,
+      body: ListView.builder(
+        padding: EdgeInsets.all(8),
+        itemCount: 10,
+        itemBuilder: (context, messageIndex) {
+          final message = "Hello";
+          final isMe = true;
+          return Align(
+            alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+            child: Container(
+              padding: EdgeInsets.all(12),
+              margin: EdgeInsets.symmetric(vertical: 4),
+              constraints: BoxConstraints(maxWidth: 250),
+              decoration: BoxDecoration(
+                color: isMe ? Colors.blue[400] : Colors.grey[300],
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                  bottomLeft: isMe? Radius.circular(12) : Radius.zero,
+                  bottomRight: isMe? Radius.zero : Radius.circular(12),
+                ),
+              ),
+              child: Text(
+                message,
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
             ),
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: appState.addName,
-              child: Text("Add Name"),
-            ),
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: appState.clearNames,
-              child: Text("Clear Names"),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
-  }
-}
-
-class TextChain extends StatefulWidget {
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-
-    return Row(
-      children: [Text(appState.getNextName())],
-    );
-  }
-  
-  @override
-  State<StatefulWidget> createState() {
-    // TODO: implement createState
-    throw UnimplementedError();
   }
 }
