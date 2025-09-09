@@ -1,8 +1,19 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
 
 void main() {
+  String jsonString = '{"name": "Test","id": 1,"messages": [{"message": "Hello","isMe": false},{"message": "Hello","isMe": true}]}';
+  Map<String, dynamic> chainMap = jsonDecode(jsonString);
+  Chain chain = Chain.fromJson(chainMap);
+  print(chain);
+  print(chainMap);
+  for(int i = 0; i < chain.messageChain.length; i++) {
+    print(chain.messageChain[i].message);
+    print(chain.messageChain[i].isMe);
+  }
+  
   runApp(MyApp());
 }
 
@@ -102,21 +113,22 @@ class ListViewBuilder extends StatelessWidget {
 class TextChain extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    int index = appState.currentIndex;
+    String jsonString = '{"name": "Test","id": 1,"messages": [{"message": "Hello","isMe": false},{"message": "Hello","isMe": true},{"message": "Goodbye","isMe": false}]}';
+    Map<String, dynamic> chainMap = jsonDecode(jsonString);
+    Chain chain = Chain.fromJson(chainMap);
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[700],
-        title: Text("Text Chain $index"),
+        title: Text(chain.name),
         centerTitle: true,
       ),
       body: ListView.builder(
         padding: EdgeInsets.all(8),
-        itemCount: 10,
+        itemCount: chain.messageChain.length,
         itemBuilder: (context, messageIndex) {
-          final message = "Hello";
-          final isMe = true;
+          final message = chain.messageChain[messageIndex].message;
+          final isMe = chain.messageChain[messageIndex].isMe;
           return Align(
             alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
             child: Container(
@@ -141,5 +153,63 @@ class TextChain extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+class Chain {
+  final String name;
+  final int id;
+  List<dynamic> messageChain;
+
+  Chain({
+    required this.name,
+    required this.id,
+    required this.messageChain,
+  });
+
+  factory Chain.fromJson(Map<String, dynamic> json){
+    return Chain(
+      name: json["name"],
+      id: json["id"],
+      messageChain: (json["messages"] as List)
+          .map((msg) => Message.fromJson(msg))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "name": name,
+      "id": id,
+      "messages": messageChain,
+    };
+  }
+}
+
+class Message {
+  // Dart variables to hold the equivalent JSON values
+  final String message;
+  final bool isMe;
+
+  // Constructor for the Dart Message class
+  Message({
+    required this.message,
+    required this.isMe,
+  });
+
+  // Factory Constuctor to turn a Message from Json into Dart
+  factory Message.fromJson(Map<String, dynamic> json){
+    return Message(
+      message: json["message"],
+      isMe: json["isMe"],
+    );
+  }
+
+  // Method to turn a Dart Message into a Json Message
+  Map<String, dynamic> toJson() {
+    return {
+      "message": message,
+      "isMe": isMe,
+    };
   }
 }

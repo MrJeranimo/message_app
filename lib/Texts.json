@@ -1,0 +1,14 @@
+{
+    "name": "Test",
+    "id": 1,
+    "messages": [
+        {
+            "message": "Hello",
+            "isMe": false
+        },
+        {
+            "message": "Hello",
+            "isMe": true
+        }
+    ]
+}
